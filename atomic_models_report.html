@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Evolution of the Atom: An Interactive Report</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f7f4;
+            color: #1f2937;
+        }
+        .timeline-item {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .timeline-item.active {
+            color: #3b82f6;
+            transform: scale(1.1);
+        }
+        .timeline-item.active .timeline-dot {
+            background-color: #3b82f6;
+            transform: scale(1.5);
+        }
+        .timeline-line {
+            height: 2px;
+            background-color: #d1d5db;
+        }
+        .timeline-dot {
+            width: 12px;
+            height: 12px;
+            background-color: #d1d5db;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        .content-card {
+            transition: opacity 0.5s ease-in-out;
+            opacity: 1;
+        }
+        .content-card.fade-out {
+            opacity: 0;
+        }
+        .atom-canvas-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 40vh;
+            margin-bottom: 0.5rem; /* Reduced spacing below canvas */
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        .figure-caption {
+            text-align: center;
+            font-size: 0.9rem;
+            color: #4b5563;
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="text-center py-12 md:py-20 bg-white">
+        <div class="container mx-auto px-4">
+            <h1 class="text-4xl md:text-6xl font-bold text-gray-800">The Evolution of the Atom: An Interactive Report</h1>
+            <p class="mt-4 text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">A comprehensive analysis of scientific discovery, from indivisible spheres to probabilistic clouds.</p>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-12 max-w-5xl">
+        <section id="introduction" class="mb-12 bg-white rounded-2xl shadow-lg p-6 md:p-10">
+            <h2 class="text-3xl font-bold text-center mb-4">Introduction: Unraveling the Atom's Secrets</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">The fundamental quest to understand the composition of matter has been a driving force in scientific inquiry since antiquity. Early philosophical thought, notably with Democritus around 430 BCE, introduced the concept of "atomos"—indivisible fragments believed to constitute all physical substance. This ancient conceptualization provided a foundational idea that would later be rigorously tested and refined through centuries of empirical investigation.</p>
+            <p class="text-gray-700 leading-relaxed mb-4">The scientific understanding of the atom has not progressed as a linear accumulation of facts but rather as a dynamic and iterative process of continuous refinement. Each successive model of the atom has emerged from new experimental observations that challenged the limitations or inconsistencies of its predecessors. This cyclical process, involving the formulation of hypotheses, rigorous empirical testing, and subsequent theoretical revision, stands as a cornerstone of scientific progress. It has consistently propelled the understanding of the atomic realm from a philosophical abstraction to a detailed, quantum-mechanical description. This historical progression, where theories are proposed and then critically examined against new evidence, exemplifies a fundamental aspect of the scientific method: the principle of falsifiability. Each atomic model, from Dalton's to the Quantum Mechanical Model, was developed based on the best available evidence of its time, yet each was subsequently found to have limitations or contradictions when confronted with novel experimental data. This consistent pattern of models being challenged, modified, or entirely replaced by empirical findings demonstrates that scientific knowledge is not absolute but continually refined. It highlights that the evolution of atomic theory involves a series of conceptual transformations, where new evidence necessitates a fundamental re-evaluation of the prevailing scientific framework, showcasing the self-correcting and progressive nature of science.</p>
+            <p class="text-gray-700 leading-relaxed">This report aims to meticulously trace the chronological and conceptual advancements in atomic theory, beginning with John Dalton's revolutionary postulates in the early 19th century and culminating in the sophisticated Quantum Mechanical Model of the 20th century. For each significant model, a comprehensive analysis will be provided, detailing its main characteristics, the pivotal experimental evidence that supported its formulation or led to its eventual revision, and its inherent limitations. The report will underscore how each new model provided a more accurate and comprehensive description of atomic structure and behavior, reflecting the dynamic and evolving nature of scientific discovery.</p>
+        </section>
+
+        <section id="interactive-timeline" class="mb-12 bg-white rounded-2xl shadow-lg p-6 md:p-10">
+            <h2 class="text-3xl font-bold text-center mb-4">A Timeline of Discovery</h2>
+            <p class="text-center text-gray-600 mb-10 max-w-2xl mx-auto">Explore the chronological development of atomic models by selecting a point on the timeline below. Each model represents a significant leap in our understanding, driven by new experimental evidence.</p>
+            
+            <div class="relative py-4">
+                <div class="timeline-line absolute top-1/2 left-0 w-full -translate-y-1/2"></div>
+                <div id="timeline-nav" class="relative flex justify-between items-center">
+                </div>
+            </div>
+        </section>
+
+        <section id="model-display" class="bg-white rounded-2xl shadow-lg p-6 md:p-10 overflow-hidden">
+            <h3 id="model-name" class="text-3xl font-bold text-gray-800 mb-1"></h3>
+            <p id="model-scientist" class="text-lg text-gray-500 mb-6"></p>
+
+            <div class="flex flex-col items-center">
+                <div id="canvas-container" class="atom-canvas-container bg-gray-100 rounded-xl">
+                    <canvas id="atom-canvas"></canvas>
+                </div>
+                <p id="figure-caption" class="figure-caption"></p>
+            </div>
+            
+            <div id="model-details" class="space-y-6">
+                <div class="content-card">
+                    <h4 class="font-bold text-xl text-blue-600 mb-2">The Big Idea</h4>
+                    <p id="model-desc" class="text-gray-700 leading-relaxed"></p>
+                </div>
+                <div class="content-card">
+                    <h4 class="font-bold text-xl text-green-600 mb-2">Key Evidence</h4>
+                    <p id="model-evidence" class="text-gray-700 leading-relaxed"></p>
+                </div>
+                <div class="content-card">
+                    <h4 class="font-bold text-xl text-red-600 mb-2">The Flaw</h4>
+                    <p id="model-flaws" class="text-gray-700 leading-relaxed"></p>
+                </div>
+            </div>
+            <div class="flex justify-between mt-8">
+                <button id="prev-btn" class="px-6 py-2 bg-gray-200 text-gray-700 font-semibold rounded-lg shadow hover:bg-gray-300 transition-colors">Previous</button>
+                <button id="next-btn" class="px-6 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow hover:bg-blue-600 transition-colors">Next</button>
+            </div>
+        </section>
+
+        <section id="comparison" class="mt-20 bg-white rounded-2xl shadow-lg p-6 md:p-10">
+            <h2 class="text-3xl font-bold text-center mb-10">Comparative Analysis</h2>
+             <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left text-gray-600">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3">Model</th>
+                            <th scope="col" class="px-6 py-3">Key Characteristics</th>
+                            <th scope="col" class="px-6 py-3">Limitations</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="bg-white border-b">
+                            <th scope="row" class="px-6 py-4 font-bold text-gray-900 whitespace-nowrap">Dalton's Theory (1803)</th>
+                            <td class="px-6 py-4">Atoms are indivisible, indestructible, and identical for a given element.</td>
+                            <td class="px-6 py-4">Proven divisible; existence of isotopes and nuclear reactions contradicted postulates.</td>
+                        </tr>
+                         <tr class="bg-gray-50 border-b">
+                            <th scope="row" class="px-6 py-4 font-bold text-gray-900 whitespace-nowrap">Thomson's Model (1904)</th>
+                            <td class="px-6 py-4">A sphere of uniform positive charge with embedded electrons ("Plum Pudding").</td>
+                            <td class="px-6 py-4">Could not explain the gold foil experiment results; unstable.</td>
+                        </tr>
+                        <tr class="bg-white border-b">
+                            <th scope="row" class="px-6 py-4 font-bold text-gray-900 whitespace-nowrap">Rutherford's Model (1911)</th>
+                            <td class="px-6 py-4">A dense, positive nucleus with electrons orbiting in mostly empty space.</td>
+                            <td class="px-6 py-4">Violated classical physics; orbiting electrons should radiate energy and spiral into the nucleus. Could not explain discrete spectra.</td>
+                        </tr>
+                        <tr class="bg-gray-50 border-b">
+                            <th scope="row" class="px-6 py-4 font-bold text-gray-900 whitespace-nowrap">Bohr's Model (1913)</th>
+                            <td class="px-6 py-4">Electrons exist in quantized, stable orbits and transition between them by absorbing/emitting photons.</td>
+                            <td class="px-6 py-4">Only worked for hydrogen; couldn't explain multi-electron atoms, Zeeman effect, or spectral line intensities.</td>
+                        </tr>
+                        <tr class="bg-white">
+                            <th scope="row" class="px-6 py-4 font-bold text-gray-900 whitespace-nowrap">Quantum Model (1926)</th>
+                            <td class="px-6 py-4">Electrons are wave-particle dualities, their location described by a probabilistic orbital (electron cloud).</td>
+                            <td class="px-6 py-4">Highly abstract and non-intuitive; computationally complex for large systems.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        
+        <section class="text-center py-16 bg-white rounded-2xl shadow-lg mt-12 p-6 md:p-10">
+             <h2 class="text-3xl font-bold text-center mb-4">A Never-Ending Story</h2>
+             <p class="text-center text-gray-600 max-w-3xl mx-auto">The evolution of the atomic model is a powerful testament to the scientific method. Each theory, built on the foundations of its predecessor, was a stepping stone, refined or replaced by new evidence. This iterative process of observation, hypothesis, and experimentation continues to push the boundaries of our knowledge.</p>
+        </section>
+
+        <section id="sources" class="mt-20 bg-white rounded-2xl shadow-lg p-6 md:p-10">
+            <h2 class="text-3xl font-bold text-center mb-6">Sources</h2>
+            <ul class="list-disc list-inside text-gray-700 space-y-2">
+                <li>Vaia. (n.d.). <i>The Discovery of the Atom</i>. Retrieved from <a href="https://www.vaia.com/en-us/explanations/physics/modern-physics/the-discovery-of-the-atom/" class="text-blue-600 hover:underline">https://www.vaia.com/en-us/explanations/physics/modern-physics/the-discovery-of-the-atom/</a></li>
+                <li>CK-12 FlexBooks. (n.d.). <i>Dalton's Atomic Theory</i>. Retrieved from <a href="https://flexbooks.ck12.org/cbook/chemistry-class-9-cbse/section/3.4/primary/lesson/daltons-atomic-theory/" class="text-blue-600 hover:underline">https://flexbooks.ck12.org/cbook/chemistry-class-9-cbse/section/3.4/primary/lesson/daltons-atomic-theory/</a></li>
+                <li>CK-12 FlexBooks. (n.d.). <i>Dalton's Atomic Theory</i>. Retrieved from <a href="https://flexbooks.ck12.org/cbook/ck-12-chemistry-flexbook-2.0/section/4.6/primary/lesson/daltons-atomic-theory-chem/" class="text-blue-600 hover:underline">https://flexbooks.ck12.org/cbook/ck-12-chemistry-flexbook-2.0/section/4.6/primary/lesson/daltons-atomic-theory-chem/</a></li>
+                <li>BYJU'S. (n.d.). <i>Thomson's Model of Atom</i>. Retrieved from <a href="https://byjus.com/chemistry/thomsons-model/" class="text-blue-600 hover:underline">https://byjus.com/chemistry/thomsons-model/</a></li>
+                <li>ScienceReady. (n.d.). <i>Thomson's Discovery of the Electron</i>. Retrieved from <a href="https://scienceready.com.au/pages/thomsons-discovery-of-the-electron" class="text-blue-600 hover:underline">https://scienceready.com.au/pages/thomsons-discovery-of-the-electron</a></li>
+                <li>GeeksforGeeks. (n.d.). <i>Drawbacks of Rutherford's Atomic Model</i>. Retrieved from <a href="https://www.geeksforgeeks.org/drawbacks-of-rutherfords-atomic-model/" class="text-blue-600 hover:underline">https://www.geeksforgeeks.org/drawbacks-of-rutherfords-atomic-model/</a></li>
+                <li>ScienceReady. (n.d.). <i>Rutherford's Atomic Model</i>. Retrieved from <a href="https://scienceready.com.au/pages/rutherfords-atomic-model" class="text-blue-600 hover:underline">https://scienceready.com.au/pages/rutherfords-atomic-model</a></li>
+                <li>Britannica. (n.d.). <i>Bohr's shell model</i>. Retrieved from <a href="https://www.britannica.com/science/atom/Bohrs-shell-model" class="text-blue-600 hover:underline">https://www.britannica.com/science/atom/Bohrs-shell-model</a></li>
+                <li>ScienceReady. (n.d.). <i>Bohr's Atomic Model</i>. Retrieved from <a href="https://scienceready.com.au/pages/bohrs-atomic-model" class="text-blue-600 hover:underline">https://www.scienceready.com.au/pages/bohrs-atomic-model</a></li>
+                <li>AZoQuantum. (n.d.). <i>The Quantum Mechanical Model of the Atom</i>. Retrieved from <a href="https://www.azoquantum.com/Article.aspx?ArticleID=461" class="text-blue-600 hover:underline">https://www.azoquantum.com/Article.aspx?ArticleID=461</a></li>
+                <li>BlueQubit. (n.d.). <i>Quantum Mechanical Model</i>. Retrieved from <a href="https://www.bluequbit.io/quantum-mechanical-model" class="text-blue-600 hover:underline">https://www.bluequbit.io/quantum-mechanical-model</a></li>
+                <li>LibreTexts Chemistry. (n.d.). <i>3.1: Basic Atomic Theory</i>. Retrieved from <a href="https://chem.libretexts.org/Courses/Furman_University/CHM101%3A_Chemistry_and_Global_Awareness_(Gordon)/03%3A_Atoms_and_the_Periodic_Table/3.01%3A_Basic_Atomic_Theory" class="text-blue-600 hover:underline">https://chem.libretexts.org/Courses/Furman_University/CHM101%3A_Chemistry_and_Global_Awareness_(Gordon)/03%3A_Atoms_and_the_Periodic_Table/3.01%3A_Basic_Atomic_Theory</a></li>
+                <li>Testbook. (n.d.). <i>In which year Dalton's atomic theory was proposed?</i> Retrieved from <a href="https://testbook.com/question-answer/in-which-year-daltons-atomic-theory-was-propo--5e4b8207f60d5d41d3cc6330" class="text-blue-600 hover:underline">https://testbook.com/question-answer/in-which-year-daltons-atomic-theory-was-propo--5e4b8207f60d5d41d3cc6330</a></li>
+                <li>Science History Institute. (n.d.). <i>Joseph John (J. J.) Thomson</i>. Retrieved from <a href="https://www.sciencehistory.org/education/scientific-biographies/joseph-john-j-j-thomson/" class="text-blue-600 hover:underline">https://www.sciencehistory.org/education/scientific-biographies/joseph-john-j-j-thomson/</a></li>
+                <li>Wikipedia. (n.d.). <i>Plum pudding model</i>. Retrieved from <a href="https://en.wikipedia.org/wiki/Plum_pudding_model" class="text-blue-600 hover:underline">https://en.wikipedia.org/wiki/Plum_pudding_model</a></li>
+                <li>Britannica. (n.d.). <i>Rutherford model</i>. Retrieved from <a href="https://www.britannica.com/science/Rutherford-model" class="text-blue-600 hover:underline">https://www.britannica.com/science/Rutherford-model</a></li>
+                <li>EBSCO. (n.d.). <i>Rutherford Model</i>. Retrieved from <a href="https://www.ebsco.com/research-starters/history/rutherford-model" class="text-blue-600 hover:underline">https://www.ebsco.com/research-starters/history/rutherford-model</a></li>
+                <li>NobelPrize.org. (n.d.). <i>Niels Bohr Facts</i>. Retrieved from <a href="https://www.nobelprize.org/prizes/physics/1922/bohr/facts/#:~:text=The%20discovery%20of%20the%20electron,quantities%20only%20take%20discrete%20values" class="text-blue-600 hover:underline">https://www.nobelprize.org/prizes/physics/1922/bohr/facts/#:~:text=The%20discovery%20of%20the%20electron,quantities%20only%20take%20discrete%20values</a></li>
+                <li>University of Rochester. (n.d.). <i>Bohr Atom</i>. Retrieved from <a href="https://www.pas.rochester.edu/~blackman/ast104/bohr.html" class="text-blue-600 hover:underline">https://www.pas.rochester.edu/~blackman/ast104/bohr.html</a></li>
+                <li>NobelPrize.org. (n.d.). <i>Werner Heisenberg Facts</i>. Retrieved from <a href="https://www.nobelprize.org/prizes/physics/1932/heisenberg/facts/" class="text-blue-600 hover:underline">https://www.nobelprize.org/prizes/physics/1932/heisenberg/facts/</a></li>
+                <li>Rincón Educativo. (n.d.). <i>Schrödinger's Atomic Model (1926 A.D.)</i>. Retrieved from <a href="https://rinconeducativo.org/en/recursos-educativos/schrodingers-atomic-model-1926-ad/" class="text-blue-600 hover:underline">https://rinconeducativo.org/en/recursos-educativos/schrodingers-atomic-model-1926-ad/</a></li>
+            </ul>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white text-center py-6">
+        <p>&copy; 2025 A Journey Through Atomic Theory. All rights reserved.</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const modelsData = [
+                {
+                    name: "Dalton's Model",
+                    scientist: "John Dalton, 1803",
+                    figureCaption: "Figure 1: Dalton's Model of the Atom. Depicts the atom as a solid, indivisible sphere.",
+                    description: "John Dalton, an English schoolteacher and chemist, proposed his groundbreaking atomic theory in 1803. His theory fundamentally transformed chemistry by asserting that all matter is composed of extremely small, discrete particles called atoms. He envisioned them as simple, solid, indivisible, and indestructible spheres. Atoms of a given element are identical in size, mass, and all other properties, distinguishing them from atoms of different elements, which possess different properties. He also stated that atoms cannot be subdivided, created, or destroyed through chemical processes, aligning with the law of conservation of mass. Furthermore, atoms of different elements combine in simple, fixed whole-number ratios to form chemical compounds, explaining the law of definite proportions.",
+                    evidence: "Dalton's theory successfully explained the Law of Conservation of Mass (atoms are merely rearranged during chemical reactions) and the Law of Definite Proportions (elements combine in fixed ratios). His meticulous studies on combining weights and volumes provided strong support for these foundational chemical laws.",
+                    flaws: "It was later discovered that atoms are divisible into subatomic particles (protons, neutrons, electrons). The existence of isotopes (atoms of the same element with different masses due to varying numbers of neutrons) contradicted the claim that all atoms of the same element are identical in mass. Nuclear fission and fusion reactions also disproved the idea that atoms cannot be created or destroyed.",
+                    drawFunc: drawDaltonModel
+                },
+                {
+                    name: "Thomson's Model",
+                    scientist: "J.J. Thomson, 1904",
+                    figureCaption: "Figure 2: Thomson's Plum Pudding Model. Positive charge is spread uniformly with embedded negative electrons.",
+                    description: "Also known as the 'Plum Pudding' model, it depicted the atom as a uniformly distributed sphere of positive charge, within which negatively charged electrons were embedded. The model is often analogized to a plum pudding, where the 'plums' are the electrons and the 'pudding' is the positive charge. Alternatively, it is compared to a watermelon, with the seeds representing electrons and the red edible part representing the positive sphere. A key postulate was that the total positive charge was equal in magnitude to the total negative charge from the electrons, ensuring the atom remained electrically neutral overall. The electrons were thought to be held in place by electrostatic attraction to the positive mass, while also experiencing electrostatic repulsion from each other, leading to their dispersed arrangement.",
+                    evidence: "Thomson's discovery of the electron in 1897 through his meticulous cathode ray experiments provided the first experimental evidence that atoms were not indivisible. By manipulating the path of cathode rays using electric and magnetic fields, he was able to calculate the charge-to-mass ratio of these negatively charged particles, which he named 'electrons'. The constancy of this ratio, regardless of the materials used, indicated that electrons are fundamental constituents of all matter.",
+                    flaws: "A major drawback was the lack of experimental evidence for the positive mass itself. The model failed to adequately explain the stability of an atom. Most critically, Thomson's model could not account for the observations from the later Geiger-Marsden gold foil experiment, which showed significant large-angle deflections and even backscattering of alpha particles, directly contradicting the Plum Pudding model's prediction of minimal deflection.",
+                    drawFunc: drawThomsonModel
+                },
+                {
+                    name: "Rutherford's Model",
+                    scientist: "Ernest Rutherford, 1911",
+                    figureCaption: "Figure 3: Rutherford's Nuclear Model. A small, dense nucleus is orbited by electrons in mostly empty space.",
+                    description: "A planetary model where the atom has a tiny, dense, positively charged nucleus at its center, with electrons orbiting it like planets around the sun. This nucleus accounts for nearly all of the atom's mass and all of its positive charge. The vast majority of the atom's volume is empty space, with the nucleus occupying only a tiny fraction of the total atomic volume.",
+                    evidence: "The Geiger-Marsden gold foil experiment, conducted under Rutherford's supervision, involved bombarding a thin gold foil with high-energy positively charged alpha particles. Most particles passed straight through undeflected, indicating predominantly empty space. However, a very small fraction were deflected at large angles or even reflected back, indicating the presence of a tiny, extremely dense, and highly positively charged region within the atom (the nucleus).",
+                    flaws: "According to classical electromagnetic theory, an orbiting electron should continuously emit electromagnetic radiation, thereby losing energy and spiraling into the nucleus, leading to the atom's instability. Classical calculations predicted this collapse would occur in less than 10⁻⁸ seconds, directly contradicting the observed stability of atoms. Furthermore, Rutherford's model could not account for the discrete emission and absorption spectra observed from different elements, as classical physics would predict a continuous spectrum.",
+                    drawFunc: drawRutherfordModel
+                },
+                {
+                    name: "Bohr's Model",
+                    scientist: "Niels Bohr, 1913",
+                    figureCaption: "Figure 4: Bohr's Model of the Atom. Electrons occupy specific, quantized orbits and transition between them by absorbing or emitting energy.",
+                    description: "Modified Rutherford's model by proposing that electrons move in fixed, quantized circular orbits, also known as 'stationary states'. Crucially, electrons in these states do not emit energy, resolving the classical stability problem. An electron can transition between these allowed orbits only by absorbing or releasing a discrete amount of energy in the form of a photon. The energy of the photon is precisely equal to the difference in energy between the initial and final orbits. The angular momentum of an electron in an allowed orbit is also quantized.",
+                    evidence: "Bohr's model achieved remarkable success in explaining the discrete emission spectrum of hydrogen. When heated hydrogen gas emits light, it produces a spectrum consisting of specific, distinct visible light lines. Bohr explained that these specific spectral lines correspond to the precise energies of photons released when excited electrons in hydrogen atoms transition from higher energy orbits to lower ones. The model also successfully predicted the existence and wavelengths of other spectral series for hydrogen.",
+                    flaws: "Its predictions were only accurate for the hydrogen atom and other single-electron systems. It failed to explain the spectra and properties of atoms with more than one electron. Bohr's model inconsistently combined principles from classical physics with quantum principles, lacking a unified theoretical framework. It did not provide a fundamental explanation for *why* electrons could exist in 'stationary states' without radiating energy. It also could not predict the relative intensity of spectral lines or explain the fine and hyperfine structures, or the Zeeman and Stark effects (splitting of spectral lines in magnetic/electric fields).",
+                    drawFunc: drawBohrModel
+                },
+                {
+                    name: "Quantum Model",
+                    scientist: "Schrödinger & Heisenberg, 1926",
+                    figureCaption: "Figure 5: Quantum Mechanical Model of the Atom. Electrons exist in probabilistic 'electron clouds' or orbitals.",
+                    description: "The modern model describes electrons not as particles in fixed paths, but as existing in probabilistic 'orbitals' or 'electron clouds' around the nucleus. A core tenet is that electrons exhibit both wave-like and particle-like behavior (wave-particle duality). The Schrödinger Equation describes the wave behavior of electrons, and the square of its magnitude represents the probability density of finding an electron in a specific region of space. Electrons can only exist in specific, discrete energy levels, with quantization arising naturally from the wave equation. Heisenberg's Uncertainty Principle states that it's impossible to simultaneously know a particle's precise position and momentum with absolute certainty. Four quantum numbers describe the state of an electron, and the Pauli Exclusion Principle states that no two electrons in the same atom can have an identical set of all four quantum numbers.",
+                    evidence: "This model successfully explains atomic stability by describing electrons in stable energy states (orbitals) where they do not continuously radiate energy. It accurately explains the discrete nature of atomic spectra, including fine and hyperfine structures, and phenomena like the Zeeman and Stark effects. Unlike Bohr's model, it can be rigorously extended to accurately describe the electronic configurations and properties of multi-electron atoms, providing a comprehensive understanding of chemical bonding and molecular structure. It provides a more complete and nuanced description of electron behavior, including intrinsic properties like spin and magnetic moment.",
+                    flaws: "It is highly mathematical and abstract, defying classical intuition. Its probabilistic nature means we can never know an electron's exact position and momentum simultaneously. It can be computationally complex for very large atoms and molecules.",
+                    drawFunc: drawQuantumModel
+                }
+            ];
+
+            let currentModelIndex = 0;
+            let animationFrameId;
+
+            const timelineNav = document.getElementById('timeline-nav');
+            const modelNameEl = document.getElementById('model-name');
+            const modelScientistEl = document.getElementById('model-scientist');
+            const figureCaptionEl = document.getElementById('figure-caption');
+            const modelDescEl = document.getElementById('model-desc');
+            const modelEvidenceEl = document.getElementById('model-evidence');
+            const modelFlawsEl = document.getElementById('model-flaws');
+            const modelDetailsContainer = document.getElementById('model-details');
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+
+            const canvas = document.getElementById('atom-canvas');
+            const ctx = canvas.getContext('2d');
+            const container = document.getElementById('canvas-container');
+
+            function resizeCanvas() {
+                canvas.width = container.clientWidth;
+                canvas.height = container.clientHeight;
+                updateDisplay(currentModelIndex, false);
+            }
+            window.addEventListener('resize', resizeCanvas);
+
+            function initTimeline() {
+                modelsData.forEach((model, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'timeline-item flex flex-col items-center space-y-2';
+                    if(index === 0) item.classList.add('active');
+                    item.innerHTML = `
+                        <div class="timeline-dot"></div>
+                        <span class="text-sm md:text-base font-semibold text-center">${model.name}</span>
+                    `;
+                    item.addEventListener('click', () => updateDisplay(index));
+                    timelineNav.appendChild(item);
+                });
+            }
+
+            function updateDisplay(index, withTransition = true) {
+                if (animationFrameId) {
+                    cancelAnimationFrame(animationFrameId);
+                }
+                currentModelIndex = index;
+                
+                const updateContent = () => {
+                    const model = modelsData[index];
+                    modelNameEl.textContent = model.name;
+                    modelScientistEl.textContent = model.scientist;
+                    figureCaptionEl.textContent = model.figureCaption;
+                    modelDescEl.textContent = model.description;
+                    modelEvidenceEl.textContent = model.evidence;
+                    modelFlawsEl.textContent = model.flaws;
+                    
+                    if (withTransition) {
+                        modelDetailsContainer.classList.remove('fade-out');
+                    }
+                    
+                    document.querySelectorAll('#timeline-nav .timeline-item').forEach((item, i) => {
+                        item.classList.toggle('active', i === index);
+                    });
+
+                    prevBtn.disabled = index === 0;
+                    nextBtn.disabled = index === modelsData.length - 1;
+                    prevBtn.classList.toggle('opacity-50', index === 0);
+                    nextBtn.classList.toggle('opacity-50', index === modelsData.length - 1);
+
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    animationFrameId = requestAnimationFrame(model.drawFunc);
+                };
+
+                if (withTransition) {
+                    modelDetailsContainer.classList.add('fade-out');
+                    setTimeout(updateContent, 300);
+                } else {
+                    updateContent();
+                }
+            }
+
+            prevBtn.addEventListener('click', () => {
+                if (currentModelIndex > 0) {
+                    updateDisplay(currentModelIndex - 1);
+                }
+            });
+
+            nextBtn.addEventListener('click', () => {
+                if (currentModelIndex < modelsData.length - 1) {
+                    updateDisplay(currentModelIndex + 1);
+                }
+            });
+
+            let time = 0;
+            function drawDaltonModel() {
+                const centerX = canvas.width / 2;
+                const centerY = canvas.height / 2;
+                const radius = Math.min(centerX, centerY) * 0.5;
+                
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+                ctx.fillStyle = '#60a5fa';
+                ctx.fill();
+                ctx.strokeStyle = '#2563eb';
+                ctx.lineWidth = 4;
+                ctx.stroke();
+            }
+
+            function drawThomsonModel() {
+                const centerX = canvas.width / 2;
+                const centerY = canvas.height / 2;
+                const radius = Math.min(centerX, centerY) * 0.7;
+                time++;
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+                const gradient = ctx.createRadialGradient(centerX, centerY, radius * 0.5, centerX, centerY, radius);
+                gradient.addColorStop(0, 'rgba(251, 191, 36, 0.4)');
+                gradient.addColorStop(1, 'rgba(251, 191, 36, 0.2)');
+                ctx.fillStyle = gradient;
+                ctx.fill();
+
+                const electrons = 8;
+                for (let i = 0; i < electrons; i++) {
+                    const angle = (i / electrons) * 2 * Math.PI + time * 0.005;
+                    const r = radius * 0.7 * (0.5 + 0.5 * Math.sin(angle * 2 + i));
+                    const x = centerX + r * Math.cos(angle);
+                    const y = centerY + r * Math.sin(angle);
+                    ctx.beginPath();
+                    ctx.arc(x, y, 5, 0, 2 * Math.PI);
+                    ctx.fillStyle = '#ef4444';
+                    ctx.fill();
+                }
+                animationFrameId = requestAnimationFrame(drawThomsonModel);
+            }
+
+            function drawRutherfordModel() {
+                const centerX = canvas.width / 2;
+                const centerY = canvas.height / 2;
+                time++;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, 10, 0, 2 * Math.PI);
+                ctx.fillStyle = '#fBBF24';
+                ctx.fill();
+
+                const orbits = [
+                    { radiusX: canvas.width * 0.2, radiusY: canvas.height * 0.1, speed: 0.02, offset: 0 },
+                    { radiusX: canvas.width * 0.35, radiusY: canvas.height * 0.25, speed: 0.01, offset: Math.PI / 2 },
+                    { radiusX: canvas.width * 0.45, radiusY: canvas.height * 0.35, speed: 0.007, offset: Math.PI },
+                ];
+                
+                orbits.forEach(orbit => {
+                    const x = centerX + orbit.radiusX * Math.cos(time * orbit.speed + orbit.offset);
+                    const y = centerY + orbit.radiusY * Math.sin(time * orbit.speed + orbit.offset);
+
+                    ctx.beginPath();
+                    ctx.ellipse(centerX, centerY, orbit.radiusX, orbit.radiusY, 0, 0, 2 * Math.PI);
+                    ctx.strokeStyle = 'rgba(107, 114, 128, 0.2)';
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+
+                    ctx.beginPath();
+                    ctx.arc(x, y, 5, 0, 2 * Math.PI);
+                    ctx.fillStyle = '#3b82f6';
+                    ctx.fill();
+                });
+                animationFrameId = requestAnimationFrame(drawRutherfordModel);
+            }
+
+            function drawBohrModel() {
+                const centerX = canvas.width / 2;
+                const centerY = canvas.height / 2;
+                const orbits = [
+                  Math.min(centerX, centerY) * 0.3, 
+                  Math.min(centerX, centerY) * 0.5, 
+                  Math.min(centerX, centerY) * 0.7
+                ];
+                time++;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, 10, 0, 2 * Math.PI);
+                ctx.fillStyle = '#fBBF24';
+                ctx.fill();
+
+                orbits.forEach(radius => {
+                    ctx.beginPath();
+                    ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+                    ctx.strokeStyle = 'rgba(107, 114, 128, 0.3)';
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                });
+
+                const jumpDuration = 200;
+                const pauseDuration = 100;
+                const phase = time % (jumpDuration + pauseDuration);
+
+                let electronRadius, electronAngle;
+                if (phase < jumpDuration / 2) { 
+                    electronRadius = orbits[2];
+                } else if (phase < jumpDuration) {
+                    const progress = (phase - jumpDuration/2) / (jumpDuration / 2);
+                    electronRadius = orbits[2] - (orbits[2] - orbits[1]) * progress;
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(centerX + orbits[1] * Math.cos(time * 0.01), centerY + orbits[1] * Math.sin(time * 0.01));
+                    ctx.lineTo(centerX + orbits[2] * Math.cos(time * 0.01), centerY + orbits[2] * Math.sin(time * 0.01));
+                    ctx.strokeStyle = `rgba(255, 255, 0, ${1-progress})`;
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+                } else {
+                    electronRadius = orbits[1];
+                }
+
+                electronAngle = time * 0.01;
+                const x = centerX + electronRadius * Math.cos(electronAngle);
+                const y = centerY + electronRadius * Math.sin(electronAngle);
+                ctx.beginPath();
+                ctx.arc(x, y, 6, 0, 2 * Math.PI);
+                ctx.fillStyle = '#3b82f6';
+                ctx.fill();
+
+                animationFrameId = requestAnimationFrame(drawBohrModel);
+            }
+            
+            function drawQuantumModel() {
+                const centerX = canvas.width / 2;
+                const centerY = canvas.height / 2;
+                const maxRadius = Math.min(centerX, centerY) * 0.8;
+                time++;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, 8, 0, 2 * Math.PI);
+                ctx.fillStyle = '#fBBF24';
+                ctx.fill();
+
+                const numParticles = 300;
+                for (let i = 0; i < numParticles; i++) {
+                    const angle = Math.random() * 2 * Math.PI;
+                    const radius = Math.pow(Math.random(), 2) * maxRadius;
+                    const x = centerX + radius * Math.cos(angle);
+                    const y = centerY + radius * Math.sin(angle);
+                    const alpha = (1 - radius / maxRadius) * 0.5 * (0.5 + 0.5 * Math.sin(time*0.01 + radius*0.1));
+
+                    ctx.fillStyle = `rgba(59, 130, 246, ${alpha})`;
+                    ctx.beginPath();
+                    ctx.arc(x,y, 1.5, 0, 2 * Math.PI);
+                    ctx.fill();
+                }
+
+                animationFrameId = requestAnimationFrame(drawQuantumModel);
+            }
+
+            initTimeline();
+            resizeCanvas();
+        });
+    </script>
+
+</body>
+</html>
