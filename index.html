@@ -171,9 +171,7 @@
             <p class="text-center text-gray-600 mb-10 max-w-2xl mx-auto">Explore the chronological development of atomic models by selecting a point on the timeline below. Each model represents a significant leap in our understanding, driven by new experimental evidence.</p>
             
             <div class="relative py-4">
-                <div class="timeline-line absolute top-1/2 left-0 w-full -translate-y-1/2"></div>
-                <div id="timeline-nav" class="relative flex justify-between items-center">
-                </div>
+                <div class="timeline-line absolute top-[calc(50%+10px)] left-0 w-full -translate-y-1/2"></div> <div id="timeline-nav" class="relative flex justify-between items-start min-h-[100px]"> </div>
             </div>
         </section>
 
@@ -366,11 +364,10 @@
             function initTimeline() {
                 modelsData.forEach((model, index) => {
                     const item = document.createElement('div');
-                    item.className = 'timeline-item flex flex-col items-center space-y-2';
+                    item.className = 'timeline-item flex flex-col items-center'; // Removed space-y-2 for manual spacing
                     if(index === 0) item.classList.add('active');
                     item.innerHTML = `
-                        <div class="timeline-dot"></div>
-                        <span class="text-sm md:text-base font-semibold text-center">${model.name}</span>
+                        <span class="text-sm md:text-base font-semibold text-center mb-4">${model.name}</span> <div class="timeline-dot"></div>
                     `;
                     item.addEventListener('click', () => updateDisplay(index));
                     timelineNav.appendChild(item);
